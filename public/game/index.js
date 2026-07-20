@@ -666,7 +666,21 @@ const Engine = (function () {
 	Engine.load = function (basePath, size) {
 		if (loadPromise == null) {
 			loadPath = basePath;
-			loadPromise = preloader.loadPromise(`${loadPath}.wasm`, size, true);
+			const chunkSize = 20 * 1024 * 1024;
+			const chunks = [0, 1].map(function (index) {
+				const trackedSize = index === 0 ? Math.min(chunkSize, size) : Math.max(0, size - chunkSize);
+				return preloader.loadPromise(`${loadPath}.wasm.part${index}`, trackedSize);
+			});
+			loadPromise = Promise.all(chunks).then(function (buffers) {
+				const total = buffers.reduce(function (sum, buffer) { return sum + buffer.byteLength; }, 0);
+				const runtime = new Uint8Array(total);
+				let offset = 0;
+				buffers.forEach(function (buffer) {
+					runtime.set(new Uint8Array(buffer), offset);
+					offset += buffer.byteLength;
+				});
+				return new Response(runtime, { 'headers': [['content-type', 'application/wasm']] });
+			});
 			requestAnimationFrame(preloader.animateProgress);
 		}
 		return loadPromise;

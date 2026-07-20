@@ -65,7 +65,8 @@ test("ships the complete playable web payload", async () => {
     "game/index.js",
     "game/index.pck",
     "game/index.wasm",
-    "game/index.wasm.br",
+    "game/index.wasm.part0",
+    "game/index.wasm.part1",
     "media/one-core-trailer.mp4",
     "og.png",
     "sw.js",
@@ -73,13 +74,18 @@ test("ships the complete playable web payload", async () => {
 
   await Promise.all(required.map((path) => access(new URL(path, root))));
 
-  const [wasm, compressed, gameHtml] = await Promise.all([
+  const [wasm, part0, part1, gameHtml, gameScript] = await Promise.all([
     stat(new URL("game/index.wasm", root)),
-    stat(new URL("game/index.wasm.br", root)),
+    stat(new URL("game/index.wasm.part0", root)),
+    stat(new URL("game/index.wasm.part1", root)),
     readFile(new URL("game/index.html", root), "utf8"),
+    readFile(new URL("game/index.js", root), "utf8"),
   ]);
 
   assert.ok(wasm.size > 30_000_000);
-  assert.ok(compressed.size < wasm.size);
+  assert.equal(part0.size + part1.size, wasm.size);
+  assert.ok(part0.size <= 25 * 1024 * 1024);
+  assert.ok(part1.size <= 25 * 1024 * 1024);
   assert.match(gameHtml, /<title>ONE CORE<\/title>/);
+  assert.match(gameScript, /wasm\.part\$\{index\}/);
 });
