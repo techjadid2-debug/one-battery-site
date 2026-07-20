@@ -40,3 +40,6 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# Generated from the committed Brotli source before dev/build.
+/public/game/index.wasm
