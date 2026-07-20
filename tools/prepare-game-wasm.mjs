@@ -1,21 +1,25 @@
-import { brotliDecompressSync } from "node:zlib";
 import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const compressedPath = join(root, "public", "game", "index.wasm.br");
 const wasmPath = join(root, "public", "game", "index.wasm");
+const partPaths = [0, 1].map((index) =>
+  join(root, "public", "game", `index.wasm.part${index}`),
+);
 
-if (!existsSync(compressedPath)) {
-  throw new Error(`Missing compressed Godot runtime: ${compressedPath}`);
+for (const partPath of partPaths) {
+  if (!existsSync(partPath)) {
+    throw new Error(`Missing Godot runtime chunk: ${partPath}`);
+  }
 }
 
 const shouldWrite =
-  !existsSync(wasmPath) || statSync(wasmPath).mtimeMs < statSync(compressedPath).mtimeMs;
+  !existsSync(wasmPath) ||
+  partPaths.some((partPath) => statSync(wasmPath).mtimeMs < statSync(partPath).mtimeMs);
 
 if (shouldWrite) {
-  const wasm = brotliDecompressSync(readFileSync(compressedPath));
+  const wasm = Buffer.concat(partPaths.map((partPath) => readFileSync(partPath)));
   const validMagic =
     wasm.length > 4 &&
     wasm[0] === 0x00 &&
@@ -24,7 +28,7 @@ if (shouldWrite) {
     wasm[3] === 0x6d;
 
   if (!validMagic) {
-    throw new Error("Decompressed Godot runtime is not a valid WebAssembly module.");
+    throw new Error("Reassembled Godot runtime is not a valid WebAssembly module.");
   }
 
   writeFileSync(wasmPath, wasm);

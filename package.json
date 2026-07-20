@@ -7,6 +7,7 @@
   },
   "scripts": {
     "prepare:game": "node tools/prepare-game-wasm.mjs",
+    "split:game": "node tools/split-game-wasm.mjs",
     "predev": "npm run prepare:game",
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
     "prebuild": "npm run prepare:game",
