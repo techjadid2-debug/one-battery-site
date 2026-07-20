@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState } from "react";
 
 export default function PlayPage() {
@@ -21,9 +20,9 @@ export default function PlayPage() {
   return (
     <main className="play-page">
       <header className="play-bar">
-        <Link href="/" className="brand"><span className="core-dot" /> ONE <b>CORE</b></Link>
+        <a href="/" className="brand"><span className="core-dot" /> ONE <b>CORE</b></a>
         <p>WEB BUILD // KEYBOARD • TOUCH • GAMEPAD</p>
-        <Link href="/" aria-label="Back to home">✕</Link>
+        <a href="/" aria-label="Back to home">✕</a>
       </header>
       <div className="game-shell" ref={shell}>
         {!started ? <div className="start-gate"><div className="start-card">

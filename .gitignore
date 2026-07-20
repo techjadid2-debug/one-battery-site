@@ -40,6 +40,8 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+/vercel-dist/
+/.vercel/
 
 # Generated from the committed Brotli source before dev/build.
 /public/game/index.wasm

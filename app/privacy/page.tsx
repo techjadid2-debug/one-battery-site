@@ -1,8 +1,6 @@
-import Link from "next/link";
-
 export default function PrivacyPage() {
   return <main className="privacy-page">
-    <Link className="brand" href="/"><span className="core-dot" /> ONE <b>CORE</b></Link>
+    <a className="brand" href="/"><span className="core-dot" /> ONE <b>CORE</b></a>
     <p className="eyebrow">LOCAL DATA // PRIVACY</p>
     <h1>Privacy</h1>
     <p>ONE CORE does not require an account and does not upload gameplay progress to a server.</p>
@@ -12,6 +10,6 @@ export default function PrivacyPage() {
     <p>The first public version contains no advertising, third-party trackers, or gameplay telemetry.</p>
     <h2>Contact</h2>
     <p>Project credits and a support contact will be added before the public release.</p>
-    <Link className="button secondary" href="/">← BACK / ORQAGA</Link>
+    <a className="button secondary" href="/">← BACK / ORQAGA</a>
   </main>;
 }

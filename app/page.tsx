@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 type Locale = "uz" | "en";
 
@@ -82,14 +81,14 @@ export default function Home() {
   return (
     <main>
       <header className="topbar">
-        <Link className="brand" href="#top" aria-label="ONE CORE home">
+        <a className="brand" href="#top" aria-label="ONE CORE home">
           <span className="core-dot" /> ONE <b>CORE</b>
-        </Link>
+        </a>
         <nav aria-label="Primary navigation">
-          <Link href="#game">{t.nav[0]}</Link>
-          <Link href="#robots">{t.nav[1]}</Link>
-          <Link href="#campaign">{t.nav[2]}</Link>
-          <Link href="#media">{t.nav[3]}</Link>
+          <a href="#game">{t.nav[0]}</a>
+          <a href="#robots">{t.nav[1]}</a>
+          <a href="#campaign">{t.nav[2]}</a>
+          <a href="#media">{t.nav[3]}</a>
         </nav>
         <button className="lang-button" onClick={toggleLocale} aria-label="Change language">
           {locale.toUpperCase()} <span>⇄</span> {locale === "uz" ? "EN" : "UZ"}
@@ -103,8 +102,8 @@ export default function Home() {
           <p className="hero-lead">{t.lead}</p>
           <p className="hero-body">{t.body}</p>
           <div className="hero-actions">
-            <Link href="/play" className="button primary">{t.play} <span>→</span></Link>
-            <Link href="#media" className="button secondary">{t.trailer}</Link>
+            <a href="/play" className="button primary">{t.play} <span>→</span></a>
+            <a href="#media" className="button secondary">{t.trailer}</a>
           </div>
           <p className="status-line"><span /> {t.status}</p>
         </div>
@@ -184,13 +183,13 @@ export default function Home() {
         <p className="eyebrow">EVAC WINDOW OPEN</p>
         <h2>{t.cta}</h2>
         <p>{t.ctaBody}</p>
-        <Link href="/play" className="button primary">{t.play} <span>→</span></Link>
+        <a href="/play" className="button primary">{t.play} <span>→</span></a>
       </section>
 
       <footer>
-        <Link className="brand" href="#top"><span className="core-dot" /> ONE <b>CORE</b></Link>
+        <a className="brand" href="#top"><span className="core-dot" /> ONE <b>CORE</b></a>
         <p>{t.footer}</p>
-        <div><Link href="/privacy">Privacy</Link><a href="https://itch.io" target="_blank" rel="noreferrer">itch.io</a></div>
+        <div><a href="/privacy">Privacy</a><a href="https://itch.io" target="_blank" rel="noreferrer">itch.io</a></div>
       </footer>
     </main>
   );
