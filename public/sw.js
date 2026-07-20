@@ -1,4 +1,4 @@
-const CACHE = "one-core-shell-v1";
+const CACHE = "one-core-shell-v2";
 const SHELL = [
   "/",
   "/play",
@@ -6,8 +6,8 @@ const SHELL = [
   "/favicon.png",
   "/pwa-512.png",
   "/og.png",
-  "/media/menu.png",
-  "/media/final-latch.png",
+  "/media/v2/hero-industrial-v2.webp",
+  "/media/v2/final-evac-v2.webp",
 ];
 
 self.addEventListener("install", (event) => {
@@ -22,6 +22,11 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  if (url.origin === self.location.origin && url.pathname.startsWith("/game/")) {
+    event.respondWith(fetch(event.request, { cache: "no-store" }));
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
       if (response.ok && new URL(event.request.url).origin === self.location.origin) {

@@ -35,6 +35,8 @@ test("server-renders the ONE CORE campaign landing page", async () => {
   assert.match(html, /Reactor Wake/);
   assert.match(html, /The Final Latch/);
   assert.match(html, /one-core-trailer\.mp4/);
+  assert.match(html, /HOW TO PLAY/);
+  assert.match(html, /how-to-play\.mp4/);
 });
 
 test("server-renders the play gate and privacy policy", async () => {
@@ -74,12 +76,14 @@ test("ships the complete playable web payload", async () => {
 
   await Promise.all(required.map((path) => access(new URL(path, root))));
 
-  const [wasm, part0, part1, gameHtml, gameScript] = await Promise.all([
+  const [wasm, part0, part1, gameHtml, gameScript, playSource, serviceWorker] = await Promise.all([
     stat(new URL("game/index.wasm", root)),
     stat(new URL("game/index.wasm.part0", root)),
     stat(new URL("game/index.wasm.part1", root)),
     readFile(new URL("game/index.html", root), "utf8"),
     readFile(new URL("game/index.js", root), "utf8"),
+    readFile(new URL("../app/play/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("sw.js", root), "utf8"),
   ]);
 
   assert.ok(wasm.size > 30_000_000);
@@ -87,5 +91,13 @@ test("ships the complete playable web payload", async () => {
   assert.ok(part0.size <= 25 * 1024 * 1024);
   assert.ok(part1.size <= 25 * 1024 * 1024);
   assert.match(gameHtml, /<title>ONE CORE<\/title>/);
+  assert.match(gameHtml, /<base href="\/game\/">/);
+  assert.match(gameHtml, /one-core:ready/);
+  assert.match(gameHtml, /one-core:error/);
+  assert.equal(new URL("index.js", "https://one-battery.vercel.app/game/").pathname, "/game/index.js");
   assert.match(gameScript, /wasm\.part\$\{index\}/);
+  assert.match(playSource, /src=\{`\/game\/\?attempt=\$\{attempt\}`\}/);
+  assert.match(playSource, /Yuklanmoqda/);
+  assert.match(serviceWorker, /pathname\.startsWith\("\/game\/"\)/);
+  assert.match(serviceWorker, /cache: "no-store"/);
 });
