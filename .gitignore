@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Generated from the committed Brotli source before dev/build.
 /public/game/index.wasm
+
+# TypeScript incremental build state
+tsconfig.tsbuildinfo

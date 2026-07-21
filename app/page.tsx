@@ -7,8 +7,11 @@ type Locale = "uz" | "en";
 
 const copy = {
   uz: {
-    nav: ["O‘yin", "O‘rganish", "Robotlar", "Kampaniya", "Media"],
+    nav: ["Protokol", "Robotlar", "Kampaniya", "Media"],
     eyebrow: "ORBITAL AES // EVAKUATSIYA PROTOKOLI 01",
+    radStatus: "RAD: FAOL",
+    bootSys: "TIZIM: ONE CORE ONLINE",
+    bootCore: "yadro ulandi",
     lead: "Ikki robot. Bitta yadro. Hech kim tashlab ketilmaydi.",
     body: "AES portlashidan keyin Piko va Atlas yagona energiya yadrosini navbat bilan ishlatib, radiatsiya ularni ishdan chiqarmasidan oldin evakuatsiya kapsulasiga yetishi kerak.",
     play: "BEPUL O‘YNASH",
@@ -17,11 +20,10 @@ const copy = {
     rule: "Bitta qoida. O‘nlab qaror.",
     ruleBody: "Bir vaqtda faqat yadroni ko‘targan robot harakatlanadi. O‘chgan robot esa og‘irligi, joylashuvi va do‘stligi bilan puzzle’ning bir qismi bo‘lib qoladi.",
     question: "Hozir energiya kimda bo‘lishi kerak?",
-    how: "To‘rt qadamda asosiy qoida",
-    howBody: "O‘yin birinchi sektordanoq hammasini harakat orqali o‘rgatadi. Mana evakuatsiya protokoli:",
+    how: "PROTOKOL // TO‘RT QADAM",
     steps: [
       ["HARAKAT", "A/D yoki ←/→ bilan faol robotni yurgizing. Space — sakrash."],
-      ["YADRONI UZATING", "Robotlar yaqin bo‘lsa E bosing. Boshqaruv darhol ikkinchi robotga o‘tadi."],
+      ["YADRONI UZATING", "Robotlar yaqin va yerda bo‘lsa E bosing. Boshqaruv darhol ikkinchi robotga o‘tadi."],
       ["O‘CHGAN TANADAN FOYDALANING", "Energiyasiz robot yurmaydi, lekin tugmani bosib turadi va platforma bo‘la oladi."],
       ["BIRGA CHIQING", "Evakuatsiya eshigi faqat Piko ham, Atlas ham detektorda turganda ochiladi."],
     ],
@@ -36,8 +38,11 @@ const copy = {
     footer: "Mustaqil sci-fi puzzle tajribasi. Uzbek va English tillarida.",
   },
   en: {
-    nav: ["Game", "Learn", "Robots", "Campaign", "Media"],
+    nav: ["Protocol", "Robots", "Campaign", "Media"],
     eyebrow: "ORBITAL NUCLEAR FACILITY // EVAC PROTOCOL 01",
+    radStatus: "RAD: ACTIVE",
+    bootSys: "SYSTEM: ONE CORE ONLINE",
+    bootCore: "core linked",
     lead: "Two robots. One core. No one gets left behind.",
     body: "After a nuclear facility rupture, Piko and Atlas must share a single energy core and reach the evacuation capsule before radiation disables them for good.",
     play: "PLAY FREE",
@@ -46,11 +51,10 @@ const copy = {
     rule: "One rule. Dozens of decisions.",
     ruleBody: "Only the robot carrying the core can move. The unpowered robot remains part of the puzzle through its weight, position, and bond with its friend.",
     question: "Who needs the energy right now?",
-    how: "The core rule in four steps",
-    howBody: "The first sector teaches everything through play. This is your evacuation protocol:",
+    how: "PROTOCOL // FOUR STEPS",
     steps: [
       ["MOVE", "Use A/D or ←/→ to move the powered robot. Space makes it jump."],
-      ["TRANSFER THE CORE", "Stand close and press E. Control moves to the other robot instantly."],
+      ["TRANSFER THE CORE", "Stand close, both on the ground, and press E. Control moves to the other robot instantly."],
       ["USE THE DEAD WEIGHT", "An unpowered robot cannot move, but it can hold a plate or become a platform."],
       ["LEAVE TOGETHER", "The evacuation door only opens when both Piko and Atlas stand in the detector."],
     ],
@@ -72,95 +76,139 @@ const sectors = [
 ];
 
 const gallery = [
-  { src: "/media/v2/shield-cycle-v2.png", label: "04 // SHIELD CYCLE" },
-  { src: "/media/v2/cooling-failure-v2.png", label: "08 // COOLING FAILURE" },
-  { src: "/media/v2/final-latch-v2.png", label: "10 // THE FINAL LATCH" },
+  { src: "/media/v2/shot-transfer.jpg", label: "01 // REACTOR WAKE", alt: "Piko standing beside Atlas, ready to hand over the core" },
+  { src: "/media/v2/shot-deadweight.jpg", label: "02 // DEAD WEIGHT", alt: "An unpowered Atlas holding position while Piko carries the core" },
+  { src: "/media/v2/shot-evac.jpg", label: "03 // NO ONE LEFT BEHIND", alt: "Piko and Atlas reaching the evacuation airlock together" },
 ];
 
 export default function Home() {
   const [locale, setLocale] = useState<Locale>("uz");
+  const [navOpen, setNavOpen] = useState(false);
   const t = copy[locale];
 
   useEffect(() => {
     const stored = window.localStorage.getItem("one-core-site-locale-v1");
-    const localeTimer = (stored === "uz" || stored === "en")
-      ? window.setTimeout(() => setLocale(stored), 0)
-      : undefined;
+    if (stored === "uz" || stored === "en") {
+      document.documentElement.lang = stored;
+      setLocale(stored);
+    }
     if ("serviceWorker" in navigator && window.location.protocol === "https:") {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
-    return () => {
-      if (localeTimer !== undefined) window.clearTimeout(localeTimer);
+  }, []);
+
+  // Close the mobile menu on Escape (keyboard accessibility).
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setNavOpen(false);
     };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navOpen]);
+
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
+    if (typeof IntersectionObserver === "undefined") {
+      els.forEach((el) => el.classList.add("in"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in");
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
   }, []);
 
   const toggleLocale = () => {
     const next = locale === "uz" ? "en" : "uz";
     setLocale(next);
+    document.documentElement.lang = next;
     window.localStorage.setItem("one-core-site-locale-v1", next);
   };
 
   return (
-    <main>
-      <header className="topbar">
+    <>
+      <a className="skip-link" href="#main">{locale === "uz" ? "Kontentga o‘tish" : "Skip to content"}</a>
+      <header className="console-header">
         <a className="brand" href="#top" aria-label="ONE CORE home"><span className="core-dot" /> ONE <b>CORE</b></a>
-        <nav aria-label="Primary navigation">
-          <a href="#game">{t.nav[0]}</a><a href="#how">{t.nav[1]}</a><a href="#robots">{t.nav[2]}</a><a href="#campaign">{t.nav[3]}</a><a href="#media">{t.nav[4]}</a>
+        <nav id="nav-primary" className={navOpen ? "nav-open" : ""} aria-label="Primary navigation" onClick={() => setNavOpen(false)}>
+          <a href="#protocol">{t.nav[0]}</a><a href="#robots">{t.nav[1]}</a><a href="#campaign">{t.nav[2]}</a><a href="#media">{t.nav[3]}</a>
         </nav>
+        <a href="/play" className="console-play">▶ {t.play}</a>
         <button className="lang-button" onClick={toggleLocale} aria-label="Change language">{locale.toUpperCase()} <span>⇄</span> {locale === "uz" ? "EN" : "UZ"}</button>
+        <button className={"nav-toggle" + (navOpen ? " is-open" : "")} aria-label="Menu" aria-controls="nav-primary" aria-expanded={navOpen} onClick={() => setNavOpen((v) => !v)}><span /><span /><span /></button>
       </header>
 
-      <section id="top" className="hero">
-        <div className="hero-copy reveal">
-          <p className="eyebrow">{t.eyebrow}</p>
-          <h1><span>ONE</span><em>CORE</em></h1>
-          <p className="hero-lead">{t.lead}</p>
-          <p className="hero-body">{t.body}</p>
-          <div className="hero-actions"><a href="/play" className="button primary">{t.play} <span>→</span></a><a href="#how" className="button secondary">{t.learn}</a></div>
-          <p className="status-line"><span /> {t.status}</p>
-        </div>
-        <div className="hero-visual">
-          <Image priority unoptimized src="/media/v2/hero-industrial-v2.webp" width={1792} height={1024} sizes="(max-width: 980px) 100vw, 58vw" alt="Piko and Atlas escaping through a damaged nuclear power station" />
-          <div className="hero-frame" aria-hidden="true" />
-          <div className="signal-card"><small>CORE LINK</small><strong>PIKO ⇄ ATLAS</strong><i>STABLE</i></div>
-        </div>
-      </section>
+      <main id="main">
+        <section id="top" className="hero">
+          <div className="hero-copy">
+            <div className="telemetry">
+              <span className="tele-tag">{t.eyebrow}</span>
+              <span className="rad-meter" aria-hidden="true"><i /></span>
+              <span className="tele-status">{t.radStatus}</span>
+            </div>
+            <pre className="boot" aria-hidden="true">{`> ${t.bootSys}\n> ${t.bootCore} ........ `}<b>OK</b>{`\n> PIKO ⇄ ATLAS ...... `}<b>STABLE</b>{" "}<span className="blink">▋</span></pre>
+            <h1><span>ONE</span><em>CORE</em></h1>
+            <p className="hero-lead">{t.lead}</p>
+            <p className="hero-body">{t.body}</p>
+            <div className="corelink">CORE LINK — <span className="piko">PIKO</span> ⇄ <span className="atlas">ATLAS</span> · <span className="ok">STABLE</span></div>
+            <div className="hero-actions"><a href="/play" className="button primary">▶ {t.play}</a><a href="#protocol" className="button secondary">{t.learn}</a></div>
+            <p className="status-line"><span /> {t.status}</p>
+          </div>
+          <div className="hero-visual">
+            <Image priority unoptimized src="/media/v2/hero-industrial-v2.webp" width={1792} height={1024} sizes="(max-width: 980px) 100vw, 56vw" alt="Piko and Atlas escaping through a damaged nuclear power station" />
+            <div className="hero-frame" aria-hidden="true" />
+            <div className="signal-card"><small>CORE LINK</small><strong>PIKO ⇄ ATLAS</strong><i>STABLE</i></div>
+          </div>
+        </section>
 
-      <section id="game" className="rule-section section-grid">
-        <div><p className="section-index">01 / CORE PROTOCOL</p><h2>{t.rule}</h2></div>
-        <div className="rule-copy"><p>{t.ruleBody}</p><blockquote>“{t.question}”</blockquote><div className="core-diagram" aria-label="Core transfers between Piko and Atlas"><span className="unit piko-unit">PIKO</span><i>CORE</i><span className="energy-line" /><span className="unit atlas-unit">ATLAS</span></div></div>
-      </section>
+        <section id="protocol" className="module module-grid rule-module">
+          <div className="module-head reveal">
+            <p className="module-id">MODULE 01 // CORE PROTOCOL</p>
+            <h2>{t.rule}</h2>
+            <p className="rule-lead">{t.ruleBody}</p>
+            <blockquote>“{t.question}”</blockquote>
+            <div className="core-diagram" aria-label="Core transfers between Piko and Atlas"><span className="unit piko-unit">PIKO</span><i>CORE</i><span className="energy-line" /><span className="unit atlas-unit">ATLAS</span></div>
+          </div>
+          <div className="reveal">
+            <p className="module-id">{t.how}</p>
+            <div className="steps-grid">{t.steps.map((step, index) => <article className="step-card" key={step[0]}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{step[0]}</h3><p>{step[1]}</p></div></article>)}</div>
+            <div className="control-strip" aria-label="Game controls"><span><kbd>A</kbd><kbd>D</kbd> MOVE</span><span><kbd>SPACE</kbd> JUMP</span><span><kbd>E</kbd> TRANSFER / USE</span><span><kbd>R</kbd> RESTART</span></div>
+            <div className="demo-shell"><video controls playsInline preload="metadata" poster="/media/v2/demo-poster.jpg"><source src="/media/v2/how-to-play.mp4" type="video/mp4" /></video><p>CORE TRAINING LOOP // 00:08</p></div>
+          </div>
+        </section>
 
-      <section id="how" className="how-section">
-        <div className="section-heading"><div><p className="section-index">02 / HOW TO PLAY</p><h2>{t.how}</h2><p className="section-body">{t.howBody}</p></div></div>
-        <div className="how-grid">
-          <div className="steps-grid">{t.steps.map((step, index) => <article className="step-card" key={step[0]}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{step[0]}</h3><p>{step[1]}</p></div></article>)}</div>
-          <div className="demo-shell"><video autoPlay muted loop playsInline controls preload="metadata" poster="/media/v2/cooling-failure-v2.png"><source src="/media/v2/how-to-play.mp4" type="video/mp4" /></video><p>CORE TRAINING LOOP // 00:14</p></div>
-        </div>
-        <div className="control-strip" aria-label="Game controls"><span><kbd>A</kbd><kbd>D</kbd> MOVE</span><span><kbd>SPACE</kbd> JUMP</span><span><kbd>E</kbd> TRANSFER / USE</span><span><kbd>R</kbd> RESTART</span></div>
-      </section>
+        <section id="robots" className="module robots-module">
+          <div className="section-heading reveal"><div><p className="module-id">MODULE 02 // SERVICE UNITS</p><h2>{t.robots}</h2></div></div>
+          <div className="robot-grid reveal">
+            <article className="robot-card piko-card"><div className="robot-sprite piko-sprite" role="img" aria-label="Piko robot" /><div><p className="robot-code">PX-01 // SCOUT</p><h3>PIKO</h3><p>{t.piko}</p></div><b>CYAN / AGILITY</b></article>
+            <article className="robot-card atlas-card"><div className="robot-sprite atlas-sprite" role="img" aria-label="Atlas robot" /><div><p className="robot-code">AT-7 // INDUSTRIAL</p><h3>ATLAS</h3><p>{t.atlas}</p></div><b>AMBER / FORCE</b></article>
+          </div>
+        </section>
 
-      <section id="robots" className="robots-section">
-        <div className="section-heading"><div><p className="section-index">03 / SERVICE UNITS</p><h2>{t.robots}</h2></div></div>
-        <div className="robot-grid">
-          <article className="robot-card piko-card"><div className="robot-sprite piko-sprite" role="img" aria-label="Piko robot" /><div><p className="robot-code">PX-01 // SCOUT</p><h3>PIKO</h3><p>{t.piko}</p></div><b>CYAN / AGILITY</b></article>
-          <article className="robot-card atlas-card"><div className="robot-sprite atlas-sprite" role="img" aria-label="Atlas robot" /><div><p className="robot-code">AT-7 // INDUSTRIAL</p><h3>ATLAS</h3><p>{t.atlas}</p></div><b>AMBER / FORCE</b></article>
-        </div>
-      </section>
+        <section id="campaign" className="module module-grid campaign-module">
+          <div className="reveal"><p className="module-id">MODULE 03 // EVACUATION ROUTE</p><h2>{t.campaign}</h2><p className="module-body">{t.campaignBody}</p><div className="campaign-stats"><span><strong>10</strong> SECTORS</span><span><strong>02</strong> ROBOTS</span><span><strong>01</strong> CORE</span></div></div>
+          <ol className="sector-list reveal">{sectors.map((sector, index) => <li key={sector}><span>{String(index + 1).padStart(2, "0")}</span><b>{sector}</b><i>{index < 3 ? "ACT I" : index < 6 ? "ACT II" : index < 9 ? "ACT III" : "FINAL"}</i></li>)}</ol>
+        </section>
 
-      <section id="campaign" className="campaign-section section-grid">
-        <div><p className="section-index">04 / EVACUATION ROUTE</p><h2>{t.campaign}</h2><p className="section-body">{t.campaignBody}</p><div className="campaign-stats"><span><strong>10</strong> SECTORS</span><span><strong>02</strong> ROBOTS</span><span><strong>01</strong> CORE</span></div></div>
-        <ol className="sector-list">{sectors.map((sector, index) => <li key={sector}><span>{String(index + 1).padStart(2, "0")}</span><b>{sector}</b><i>{index < 3 ? "ACT I" : index < 6 ? "ACT II" : index < 9 ? "ACT III" : "FINAL"}</i></li>)}</ol>
-      </section>
+        <section id="media" className="module media-module">
+          <div className="section-heading reveal"><div><p className="module-id">MODULE 04 // VISUAL LOG</p><h2>{t.media}</h2></div></div>
+          <div className="trailer-shell reveal"><video controls playsInline preload="metadata" poster="/media/v2/trailer-poster.jpg"><source src="/media/one-core-trailer.mp4" type="video/mp4" /></video><span className="trailer-label">GAMEPLAY TRANSMISSION // 00:21</span></div>
+          <div className="gallery reveal">{gallery.map((item) => <figure key={item.src}><Image unoptimized width={1280} height={720} sizes="(max-width: 640px) 100vw, 33vw" src={item.src} alt={item.alt} /><figcaption>{item.label}</figcaption></figure>)}</div>
+        </section>
 
-      <section id="media" className="media-section">
-        <div className="section-heading"><div><p className="section-index">05 / VISUAL LOG</p><h2>{t.media}</h2></div></div>
-        <div className="trailer-shell"><video controls playsInline preload="metadata" poster="/media/v2/final-latch-v2.png"><source src="/media/one-core-trailer.mp4" type="video/mp4" /></video><span className="trailer-label">GAMEPLAY TRANSMISSION // 00:30</span></div>
-        <div className="gallery">{gallery.map((item) => <figure key={item.src}><Image unoptimized width={1280} height={720} sizes="(max-width: 640px) 100vw, 33vw" src={item.src} alt={item.label} /><figcaption>{item.label}</figcaption></figure>)}</div>
-      </section>
-
-      <section className="final-cta"><p className="eyebrow">EVAC WINDOW OPEN</p><h2>{t.cta}</h2><p>{t.ctaBody}</p><a href="/play" className="button primary">{t.play} <span>→</span></a></section>
-      <footer><a className="brand" href="#top"><span className="core-dot" /> ONE <b>CORE</b></a><p>{t.footer}</p><div><a href="/privacy">Privacy</a><a href="https://itch.io" target="_blank" rel="noreferrer">itch.io</a></div></footer>
-    </main>
+        <section className="final-cta reveal"><p className="eyebrow">EVAC WINDOW OPEN</p><h2>{t.cta}</h2><p>{t.ctaBody}</p><a href="/play" className="button primary">▶ {t.play}</a></section>
+        <footer><a className="brand" href="#top"><span className="core-dot" /> ONE <b>CORE</b></a><p>{t.footer}</p><div><a href="/play">Play</a><a href="/privacy">Privacy</a></div></footer>
+      </main>
+    </>
   );
 }

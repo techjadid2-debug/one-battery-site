@@ -23,5 +23,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="uz"><body>{children}</body></html>;
+  // Runs before first paint: (1) add `js` so scroll-reveal is opt-in and the page is
+  // fully visible without JS; (2) set <html lang> from the stored preference so screen
+  // readers and the first paint match the visitor's language (reduces the uz→en flash).
+  const bootScript = `document.documentElement.classList.add('js');try{var l=localStorage.getItem('one-core-site-locale-v1');if(l==='en'||l==='uz'){document.documentElement.lang=l;}}catch(e){}`;
+  return (
+    <html lang="uz" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+        <link rel="preload" href="/fonts/ibm-plex-mono-700-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/inter-400-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
 }
