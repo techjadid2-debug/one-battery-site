@@ -16,7 +16,7 @@ const copy = {
     body: "AES portlashidan keyin Piko va Atlas yagona energiya yadrosini navbat bilan ishlatib, radiatsiya ularni ishdan chiqarmasidan oldin evakuatsiya kapsulasiga yetishi kerak.",
     play: "BEPUL O‘YNASH",
     learn: "QANDAY O‘YNALADI",
-    status: "WEBDA BEPUL • 10 LEVEL • ≈90 DAQIQA",
+    status: "WEB + TELEGRAM • 10 LEVEL • WEEKLY CHALLENGE",
     rule: "Bitta qoida. O‘nlab qaror.",
     ruleBody: "Bir vaqtda faqat yadroni ko‘targan robot harakatlanadi. O‘chgan robot esa og‘irligi, joylashuvi va do‘stligi bilan puzzle’ning bir qismi bo‘lib qoladi.",
     question: "Hozir energiya kimda bo‘lishi kerak?",
@@ -32,6 +32,11 @@ const copy = {
     atlas: "Og‘ir yuklarni suradi, katta mexanizmlarni ushlab turadi va Piko uchun yo‘l yaratadi.",
     campaign: "AES ichida 10 sektor",
     campaignBody: "Har sektor bitta yangi fikrni o‘rgatadi, keyin uni oldingi mexanikalar bilan birlashtiradi. Radiatsiya taymeri ilk harakatingizdan keyin ishga tushadi.",
+    live: "Har hafta yangi protokol",
+    liveBody: "Telegram profilingizni ulang, cloud save’ni yoqing va haftalik modifierlarda do‘stlaringiz vaqtini quving.",
+    weekly: "Haftalik sinov",
+    cloud: "Cloud progress",
+    invite: "Do‘stlik bonusi",
     media: "Reaktor ichidan signal",
     cta: "Yadroni oling. Do‘stingizni toping. Birga chiqing.",
     ctaBody: "ONE CORE klaviatura, gamepad va mobil touch boshqaruvda ishlaydi. Progress shu qurilmada avtomatik saqlanadi.",
@@ -47,7 +52,7 @@ const copy = {
     body: "After a nuclear facility rupture, Piko and Atlas must share a single energy core and reach the evacuation capsule before radiation disables them for good.",
     play: "PLAY FREE",
     learn: "HOW TO PLAY",
-    status: "FREE ON WEB • 10 LEVELS • ≈90 MINUTES",
+    status: "WEB + TELEGRAM • 10 LEVELS • WEEKLY CHALLENGE",
     rule: "One rule. Dozens of decisions.",
     ruleBody: "Only the robot carrying the core can move. The unpowered robot remains part of the puzzle through its weight, position, and bond with its friend.",
     question: "Who needs the energy right now?",
@@ -63,6 +68,11 @@ const copy = {
     atlas: "Moves heavy cargo, holds industrial mechanisms, and creates a path for Piko.",
     campaign: "10 sectors inside the facility",
     campaignBody: "Each sector teaches one new idea, then combines it with every rule you know. The radiation timer starts on your first move.",
+    live: "A new protocol every week",
+    liveBody: "Link your Telegram profile, enable cloud save, and chase your friends’ times through rotating weekly modifiers.",
+    weekly: "Weekly challenge",
+    cloud: "Cloud progress",
+    invite: "Friend bonus",
     media: "Signal from inside the reactor",
     cta: "Take the core. Find your friend. Get out together.",
     ctaBody: "ONE CORE supports keyboard, gamepad, and mobile touch controls. Progress saves automatically on this device.",
@@ -88,13 +98,15 @@ export default function Home() {
 
   useEffect(() => {
     const stored = window.localStorage.getItem("one-core-site-locale-v1");
+    let localeFrame = 0;
     if (stored === "uz" || stored === "en") {
       document.documentElement.lang = stored;
-      setLocale(stored);
+      localeFrame = window.requestAnimationFrame(() => setLocale(stored));
     }
     if ("serviceWorker" in navigator && window.location.protocol === "https:") {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
+    return () => window.cancelAnimationFrame(localeFrame);
   }, []);
 
   // Close the mobile menu on Escape (keyboard accessibility).
@@ -200,8 +212,17 @@ export default function Home() {
           <ol className="sector-list reveal">{sectors.map((sector, index) => <li key={sector}><span>{String(index + 1).padStart(2, "0")}</span><b>{sector}</b><i>{index < 3 ? "ACT I" : index < 6 ? "ACT II" : index < 9 ? "ACT III" : "FINAL"}</i></li>)}</ol>
         </section>
 
+        <section className="module live-module">
+          <div className="section-heading reveal"><div><p className="module-id">MODULE 04 // LIVE SERVICE</p><h2>{t.live}</h2><p className="module-body">{t.liveBody}</p></div></div>
+          <div className="live-grid reveal">
+            <article><span>01</span><h3>{t.weekly}</h3><p>TIME • TRANSFER LIMIT • NO RESTART</p></article>
+            <article><span>02</span><h3>{t.cloud}</h3><p>TELEGRAM PROFILE • MULTI-DEVICE SAVE</p></article>
+            <article><span>03</span><h3>{t.invite}</h3><p>REFERRAL SHARD • FRIEND LEADERBOARD</p></article>
+          </div>
+        </section>
+
         <section id="media" className="module media-module">
-          <div className="section-heading reveal"><div><p className="module-id">MODULE 04 // VISUAL LOG</p><h2>{t.media}</h2></div></div>
+          <div className="section-heading reveal"><div><p className="module-id">MODULE 05 // VISUAL LOG</p><h2>{t.media}</h2></div></div>
           <div className="trailer-shell reveal"><video controls playsInline preload="metadata" poster="/media/v2/trailer-poster.jpg"><source src="/media/one-core-trailer.mp4" type="video/mp4" /></video><span className="trailer-label">GAMEPLAY TRANSMISSION // 00:21</span></div>
           <div className="gallery reveal">{gallery.map((item) => <figure key={item.src}><Image unoptimized width={1280} height={720} sizes="(max-width: 640px) 100vw, 33vw" src={item.src} alt={item.alt} /><figcaption>{item.label}</figcaption></figure>)}</div>
         </section>

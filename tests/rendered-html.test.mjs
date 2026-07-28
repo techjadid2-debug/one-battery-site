@@ -35,7 +35,7 @@ test("server-renders the ONE CORE campaign landing page", async () => {
   assert.match(html, /Reactor Wake/);
   assert.match(html, /The Final Latch/);
   assert.match(html, /one-core-trailer\.mp4/);
-  assert.match(html, /HOW TO PLAY/);
+  assert.match(html, /QANDAY O‘YNALADI/);
   assert.match(html, /how-to-play\.mp4/);
 });
 
@@ -53,11 +53,11 @@ test("server-renders the play gate and privacy policy", async () => {
     privacyResponse.text(),
   ]);
 
-  assert.match(play, /START \/ BOSHLASH/);
-  assert.match(play, /LANDSCAPE RECOMMENDED/);
-  assert.match(play, /KEYBOARD • TOUCH • GAMEPAD/);
-  assert.match(privacy, /does not require an account/);
-  assert.match(privacy, /no advertising, third-party trackers/);
+  assert.match(play, /CAMPAIGN/);
+  assert.match(play, /WEEKLY PROTOCOL/);
+  assert.match(play, /TELEGRAM • CLOUD SAVE/);
+  assert.match(privacy, /played as a guest/);
+  assert.match(privacy, /Telegram Stars/);
 });
 
 test("ships the complete playable web payload", async () => {
@@ -96,8 +96,32 @@ test("ships the complete playable web payload", async () => {
   assert.match(gameHtml, /one-core:error/);
   assert.equal(new URL("index.js", "https://one-battery.vercel.app/game/").pathname, "/game/index.js");
   assert.match(gameScript, /wasm\.part\$\{index\}/);
-  assert.match(playSource, /src=\{`\/game\/\?attempt=\$\{attempt\}`\}/);
+  assert.match(playSource, /src=\{`\/game\/\?attempt=\$\{attempt\}\$\{challengeQuery\}`\}/);
   assert.match(playSource, /Yuklanmoqda/);
+  assert.match(playSource, /telegram-mini-app/);
+  assert.match(playSource, /level-completed/);
   assert.match(serviceWorker, /pathname\.startsWith\("\/game\/"\)/);
   assert.match(serviceWorker, /cache: "no-store"/);
+});
+
+test("ships the live-service API and D1 migration contracts", async () => {
+  const root = new URL("../", import.meta.url);
+  const [schema, migration, play, webhook, game] = await Promise.all([
+    readFile(new URL("db/schema.ts", root), "utf8"),
+    readFile(new URL("drizzle/0000_greedy_winter_soldier.sql", root), "utf8"),
+    readFile(new URL("app/play/page.tsx", root), "utf8"),
+    readFile(new URL("app/api/webhooks/telegram/route.ts", root), "utf8"),
+    readFile(new URL("../scripts/game.gd", root), "utf8"),
+  ]);
+  assert.match(schema, /weeklyChallenges/);
+  assert.match(schema, /challengeScores/);
+  assert.match(schema, /referrals/);
+  assert.match(schema, /inventory/);
+  assert.match(migration, /CREATE TABLE `level_progress`/);
+  assert.match(migration, /CREATE TABLE `weekly_challenges`/);
+  assert.match(play, /level-completed/);
+  assert.match(play, /referral-shared/);
+  assert.match(game, /checkpoint-restored/);
+  assert.match(webhook, /successful_payment/);
+  assert.match(webhook, /\/paysupport/);
 });
