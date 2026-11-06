@@ -115,9 +115,7 @@ export async function createSession(userId: string, telegramId: string) {
   return `${encoded}.${signature}`;
 }
 
-export async function readSession(request: Request): Promise<GameSession | null> {
-  const cookie = request.headers.get("cookie") ?? "";
-  const token = cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${SESSION_COOKIE}=`))?.slice(SESSION_COOKIE.length + 1);
+export async function verifySessionToken(token: string): Promise<GameSession | null> {
   if (!token) return null;
   const [encoded, receivedSignature] = token.split(".");
   if (!encoded || !receivedSignature) return null;
@@ -130,6 +128,35 @@ export async function readSession(request: Request): Promise<GameSession | null>
   } catch {
     return null;
   }
+}
+
+export async function readSession(request: Request): Promise<GameSession | null> {
+  const cookie = request.headers.get("cookie") ?? "";
+  const cookieToken = cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${SESSION_COOKIE}=`))?.slice(SESSION_COOKIE.length + 1);
+  if (cookieToken) {
+    const session = await verifySessionToken(cookieToken);
+    if (session) return session;
+  }
+
+  const authHeader = request.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const bearerToken = authHeader.slice(7).trim();
+    const session = await verifySessionToken(bearerToken);
+    if (session) return session;
+  }
+
+  try {
+    const url = new URL(request.url);
+    const queryToken = url.searchParams.get("auth");
+    if (queryToken) {
+      const session = await verifySessionToken(queryToken);
+      if (session) return session;
+    }
+  } catch {
+    // Ignore URL parse error
+  }
+
+  return null;
 }
 
 export function sessionCookie(token: string) {

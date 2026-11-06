@@ -58,11 +58,103 @@ declare global {
   }
 }
 
-const modifierCopy: Record<string, string> = {
-  transfer_limit: "8 ta transfer limiti",
-  critical_timer: "30% tezroq radiatsiya",
-  no_restart: "Restartsiz urinish",
-  precision_route: "15% qisqa vaqt",
+type Locale = "uz" | "en";
+
+const playCopy = {
+  uz: {
+    liveService: "JONLI XIZMAT",
+    subBrand: "WEB • TELEGRAM • BULUTLI SAQLASH",
+    coreLinkReady: "YADRO TIZIMI TAYYOR // LANDSCAPE (YOTIQ) TAVSIYA ETILADI",
+    leadDesc: "Ovozni yoqing, telefonni yotiq tuting va AES reaktoridan ikkala robot bilan birga chiqing.",
+    campaignBtn: "BOSQICHLARNI BOSHLASH",
+    weeklyBtn: "HAFTALIK SINOV",
+    cloudLink: "BULUTLI SAQLASH //",
+    guestSave: "MEHMON REJIMI // TELEGRAM ORQALI CLOUD SAVE OCHING",
+    weeklyProtocol: "HAFTALIK PROTOKOL",
+    sector: "SEKTOR",
+    weeklySub: "Hafta yakunigacha eng yaxshi vaqtni qayd eting va eksklyuziv nishon yuting.",
+    emptyRank: "Birinchi rekord sizniki bo‘lishi mumkin.",
+    coreStore: "YADRO DO‘KONI // STARS",
+    share: "ULASHISH",
+    profile: "PROFIL",
+    guest: "MEHMON",
+    login: "KIRISH",
+    deviceOrient: "Qurilmani yotiq holatga buring",
+    deviceOrientSub: "16:9 keng formatli o‘yin uchun telefonni yonboshga aylantiring.",
+    fullscreenBtn: "TO‘LIQ EKRAN",
+    pcNoticeTitle: "Kompyuterda o‘ynayapsizmi?",
+    pcNoticeDesc: "Telegram Desktop oynasi tor bo‘lishi mumkin. Katta 16:9 monitor ekranida klaviatura bilan qulay o‘ynash uchun brauzerda oching:",
+    pcNoticeBtn: "🖥 Brauzerda to‘liq ekranda ochish ↗",
+    langPrompt: "Til / Language",
+    controlsTip: "🎮 Boshqaruv: Telefonda sensorli tugmalar, Kompyuterda WASD / Yo‘nalish tugmalari va E",
+    connLost: "Ulanish uzildi",
+    retry: "QAYTA URINISH",
+    slowNet: "Tarmoq sekin ishlayapti. Yana biroz kuting yoki qayta urinib ko‘ring.",
+    midLoad: "Reaktor sektorlari yuklanmoqda…",
+    fastLoad: "AES sektorlari va robot tizimlari tayyorlanmoqda…",
+    challengeLink: "HAFTALIK PROTOKOL TAYYORLANMOQDA",
+    bootSeq: "YADRO TIZIMI ISHGA TUSHMOQDA",
+    timeoutError: "O‘yin yuklanishi kutilganidan uzoq davom etdi.",
+    gameError: "O‘yin ishga tushmadi.",
+    referralCopied: "Taklif havolasi nusxalandi.",
+    referralBonus: "Do‘stlik bonusi: 1 referral shard inventarga qo‘shildi.",
+    recordSaved: "Haftalik natijangiz leaderboardga yozildi.",
+    telegramConnected: "Telegram profilingiz ulandi. Cloud save faol.",
+    itemAdded: "inventarga qo‘shildi.",
+    modifiers: {
+      transfer_limit: "8 ta transfer limiti",
+      critical_timer: "30% tezroq radiatsiya",
+      no_restart: "Restartsiz urinish",
+      precision_route: "15% qisqa vaqt",
+    } as Record<string, string>,
+  },
+  en: {
+    liveService: "LIVE SERVICE",
+    subBrand: "WEB • TELEGRAM • CLOUD SAVE",
+    coreLinkReady: "CORE LINK READY // LANDSCAPE RECOMMENDED",
+    leadDesc: "Turn on sound, hold device in landscape, and escape the facility together.",
+    campaignBtn: "START CAMPAIGN",
+    weeklyBtn: "WEEKLY PROTOCOL",
+    cloudLink: "CLOUD LINK //",
+    guestSave: "GUEST SAVE // OPEN CLOUD SAVE VIA TELEGRAM",
+    weeklyProtocol: "WEEKLY PROTOCOL",
+    sector: "SECTOR",
+    weeklySub: "Set the best time by week's end and earn an exclusive badge.",
+    emptyRank: "You could set the very first record.",
+    coreStore: "CORE STORE // STARS",
+    share: "SHARE",
+    profile: "PROFILE",
+    guest: "GUEST",
+    login: "LOGIN",
+    deviceOrient: "Rotate your device to landscape",
+    deviceOrientSub: "Turn your device sideways for the optimal 16:9 widescreen experience.",
+    fullscreenBtn: "FULLSCREEN",
+    pcNoticeTitle: "Playing on PC / Mac?",
+    pcNoticeDesc: "Telegram Desktop window can be narrow. For full 16:9 widescreen view with keyboard, open in browser:",
+    pcNoticeBtn: "🖥 Open in Full Browser ↗",
+    langPrompt: "Language / Til",
+    controlsTip: "🎮 Controls: Mobile touch D-pad & buttons, PC uses WASD / Arrow keys & E",
+    connLost: "Connection Interrupted",
+    retry: "RETRY",
+    slowNet: "Network is slow. Please wait or try again.",
+    midLoad: "Reactor sectors are loading…",
+    fastLoad: "Facility sectors and robot systems booting…",
+    challengeLink: "WEEKLY PROTOCOL LINK",
+    bootSeq: "CORE BOOT SEQUENCE",
+    timeoutError: "Game loading took longer than expected.",
+    gameError: "Failed to start the game.",
+    referralCopied: "Invite link copied to clipboard.",
+    referralBonus: "Friend bonus: 1 referral shard added to inventory.",
+    recordSaved: "Your weekly run was added to leaderboard.",
+    telegramConnected: "Telegram profile linked. Cloud save active.",
+    itemAdded: "added to inventory.",
+    modifiers: {
+      transfer_limit: "8 transfer limit",
+      critical_timer: "30% faster radiation",
+      no_restart: "No-restart run",
+      precision_route: "15% tighter time",
+    } as Record<string, string>,
+  },
 };
 
 function formatElapsed(seconds: number) {
@@ -75,12 +167,16 @@ function formatRun(milliseconds: number) {
 }
 
 export default function PlayPage() {
+  const [locale, setLocale] = useState<Locale>("uz");
   const [state, setState] = useState<LoadState>("idle");
   const [progress, setProgress] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState("");
   const [player, setPlayer] = useState<Player | null>(null);
+  const [rawAuthToken, setRawAuthToken] = useState<string>("");
+  const [isTgDesktop, setIsTgDesktop] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [botUsername, setBotUsername] = useState("");
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
@@ -94,6 +190,53 @@ export default function PlayPage() {
   const shell = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const referralClaimed = useRef(false);
+
+  const t = playCopy[locale];
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("one-core-site-locale-v1") as Locale | null;
+      if (stored === "uz" || stored === "en") setLocale(stored);
+    } catch {
+      // ignore
+    }
+
+    const detectPlatform = () => {
+      const isMouse = !window.matchMedia("(pointer: coarse)").matches;
+      const isNarrow = window.innerWidth < 880;
+      if (isMouse && isNarrow) {
+        setIsTgDesktop(true);
+      }
+    };
+    detectPlatform();
+    window.addEventListener("resize", detectPlatform);
+    return () => window.removeEventListener("resize", detectPlatform);
+  }, []);
+
+  const setGameLocale = (next: Locale) => {
+    setLocale(next);
+    try {
+      window.localStorage.setItem("one-core-site-locale-v1", next);
+    } catch {
+      // ignore
+    }
+  };
+
+  const toggleLocale = () => {
+    setGameLocale(locale === "uz" ? "en" : "uz");
+  };
+
+  const toggleFullscreen = () => {
+    const tg = window.Telegram?.WebApp as (TelegramWebApp & { requestFullscreen?(): void }) | undefined;
+    if (typeof tg?.requestFullscreen === "function") {
+      try { tg.requestFullscreen(); } catch {}
+    }
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => null);
+    } else {
+      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => null);
+    }
+  };
 
   const started = state !== "idle";
 
@@ -114,7 +257,7 @@ export default function PlayPage() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ code: startParam.slice(4) }),
     });
-    if (response.ok) setServiceNotice("Do‘stlik bonusi: 1 referral shard inventarga qo‘shildi.");
+    if (response.ok) setServiceNotice(t.referralBonus);
   };
 
   useEffect(() => {
@@ -132,11 +275,37 @@ export default function PlayPage() {
         const data = await catalogResponse.json() as { items: CatalogItem[] };
         setCatalog(data.items ?? []);
       }
-      const telegram = window.Telegram?.WebApp;
-      if (!telegram?.initData) return;
+      // Check for auth token in URL query parameter (?auth=...)
+      const searchParams = new URLSearchParams(window.location.search);
+      const urlAuthToken = searchParams.get("auth");
+      if (urlAuthToken) {
+        setRawAuthToken(urlAuthToken);
+        const tokenRes = await fetch("/api/auth/token", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ token: urlAuthToken }),
+        }).catch(() => null);
+        if (!cancelled && tokenRes?.ok) {
+          const data = await tokenRes.json() as { user: Player };
+          setPlayer(data.user);
+        }
+      }
+
+      const telegram = window.Telegram?.WebApp as (TelegramWebApp & { platform?: string; requestFullscreen?(): void }) | undefined;
+      if (!telegram) return;
       telegram.ready();
       telegram.expand();
-      telegram.lockOrientation?.();
+      if (typeof telegram.requestFullscreen === "function") {
+        try { telegram.requestFullscreen(); } catch {}
+      }
+      if (typeof telegram.lockOrientation === "function") {
+        try { telegram.lockOrientation(); } catch {}
+      }
+      const tgPlat = telegram.platform;
+      if (tgPlat === "tdesktop" || tgPlat === "macos" || tgPlat === "web" || tgPlat === "weba") {
+        setIsTgDesktop(true);
+      }
+      if (!telegram.initData) return;
       const authResponse = await fetch("/api/auth/telegram-mini-app", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -343,67 +512,155 @@ export default function PlayPage() {
     }
   };
 
+  const sendGameAction = (action: string, pressed: boolean) => {
+    if (frame.current?.contentWindow) {
+      frame.current.contentWindow.postMessage({
+        type: "one-core:action",
+        action,
+        pressed,
+      }, "*");
+    }
+    if (pressed && window.Telegram?.WebApp?.HapticFeedback) {
+      try {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred("light");
+      } catch {}
+    }
+  };
+
   const challengeQuery = challengeActive && challenge
     ? `&level=${challenge.level}&challenge=${encodeURIComponent(challenge.id)}&modifier=${encodeURIComponent(challenge.modifier)}`
     : "";
   const loadingCopy = elapsed >= 45
-    ? "Tarmoq sekin ishlayapti. Yana biroz kuting yoki qayta urinib ko‘ring."
+    ? t.slowNet
     : elapsed >= 20
-      ? "Reaktor sektorlari odatdagidan sekinroq yuklanmoqda…"
-      : "AES sektorlari va robot tizimlari tayyorlanmoqda…";
+      ? t.midLoad
+      : t.fastLoad;
 
   return (
     <main className="play-page">
       <header className="play-bar">
         <Link href="/" className="brand"><span className="core-dot" /> ONE <b>CORE</b></Link>
-        <span className="live-status"><i /> LIVE SERVICE</span>
-        <p>WEB • TELEGRAM • CLOUD SAVE</p>
-        {player ? (
-          <button className="player-chip" onClick={() => void shareReferral()} title="Do‘stga taklif yuborish">
-            <span>{player.displayName.slice(0, 1).toUpperCase()}</span>
-            <b>{player.displayName}</b>
-            <i>SHARE +</i>
+        <span className="live-status"><i /> {t.liveService}</span>
+        <p>{t.subBrand}</p>
+
+        <div className="play-bar-right">
+          {/* Til almashtirish: UZ / EN */}
+          <button
+            className="lang-button"
+            onClick={toggleLocale}
+            title={locale === "uz" ? "Switch to English" : "O‘zbek tiliga o‘tish"}
+            aria-label="Change language"
+          >
+            <b>{locale.toUpperCase()}</b>
+            <span style={{ opacity: 0.65 }}>⇄</span>
+            <span style={{ color: "var(--cyan)" }}>{locale === "uz" ? "EN" : "UZ"}</span>
           </button>
-        ) : (
-          <button className="player-chip guest" onClick={() => void requestBotCode()}>
-            <span>?</span><b>GUEST</b><i>TELEGRAM +</i>
+
+          {/* To‘liq ekran tugmasi */}
+          <button
+            className="fullscreen-button"
+            onClick={toggleFullscreen}
+            title={t.fullscreenBtn}
+            aria-label="To‘liq ekran rejimi"
+          >
+            {isFullscreen ? "🗗" : "⛶"}
           </button>
-        )}
-        <Link href="/" aria-label="Bosh sahifaga qaytish">✕</Link>
+
+          {player ? (
+            <Link href="/profile" className="player-chip-link" title={t.profile}>
+              <span className="chip-avatar">{player.displayName.slice(0, 1).toUpperCase()}</span>
+              <b className="chip-name">{player.displayName}</b>
+              <i className="chip-role">{t.profile}</i>
+            </Link>
+          ) : (
+            <Link href="/profile" className="player-chip-link guest" title={t.login}>
+              <span className="chip-avatar">?</span>
+              <b className="chip-name">{t.guest}</b>
+              <i className="chip-role">{t.login}</i>
+            </Link>
+          )}
+
+          <Link href="/" className="play-bar-close-btn" aria-label="Bosh sahifaga qaytish">✕</Link>
+        </div>
       </header>
 
       <div className="game-shell" ref={shell}>
         {state === "idle" ? <div className="start-gate">
           <div className="start-layout">
             <div className="start-card">
-              <p className="eyebrow">CORE LINK READY // LANDSCAPE RECOMMENDED</p>
+              <p className="eyebrow">{t.coreLinkReady}</p>
               <h1><span>ONE</span><em>CORE</em></h1>
-              <p>Ovozni yoqing, qurilmani yotiq tuting va AESdan ikkala robot bilan birga chiqing.</p>
+              <p>{t.leadDesc}</p>
               <div className="start-actions">
-                <button className="button primary" onClick={() => start(false)}>CAMPAIGN <span>→</span></button>
-                {challenge ? <button className="button secondary weekly-button" onClick={() => start(true)}>WEEKLY #{challenge.level} <span>↗</span></button> : null}
+                <button className="button primary" onClick={() => start(false)}>{t.campaignBtn} <span>→</span></button>
+                {challenge ? <button className="button secondary weekly-button" onClick={() => start(true)}>{t.weeklyBtn} #{challenge.level} <span>↗</span></button> : null}
+                {player ? (
+                  <button className="button secondary" onClick={() => void shareReferral()} title="Do‘stga taklif yuborish">
+                    🔗 {t.share} <span>+</span>
+                  </button>
+                ) : null}
               </div>
-              <small>{player ? `CLOUD LINK // ${player.displayName.toUpperCase()}` : "GUEST SAVE // TELEGRAM ORQALI CLOUD SAVE OCHING"}</small>
+
+              {/* Til tanlash tugmalari (Har doim ko‘rinadigan UZ / EN panel) */}
+              <div className="start-lang-switcher">
+                <span className="lang-prompt">{t.langPrompt}:</span>
+                <button
+                  type="button"
+                  className={`lang-choice-btn ${locale === "uz" ? "active" : ""}`}
+                  onClick={() => setGameLocale("uz")}
+                >
+                  🇺🇿 O‘zbekcha
+                </button>
+                <button
+                  type="button"
+                  className={`lang-choice-btn ${locale === "en" ? "active" : ""}`}
+                  onClick={() => setGameLocale("en")}
+                >
+                  🇬🇧 English
+                </button>
+              </div>
+
+              {/* Kompyuter / Telegram Desktop uchun qulay brauzer tavsiyasi */}
+              {isTgDesktop ? (
+                <div className="desktop-browser-card">
+                  <div className="desktop-browser-header">
+                    <span className="desktop-badge">🖥 PC / MAC</span>
+                    <b>{t.pcNoticeTitle}</b>
+                  </div>
+                  <p>{t.pcNoticeDesc}</p>
+                  <a
+                    href={`/api/auth/session?next=/play${rawAuthToken ? `&auth=${encodeURIComponent(rawAuthToken)}` : ""}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="desktop-open-btn"
+                  >
+                    {t.pcNoticeBtn}
+                  </a>
+                </div>
+              ) : null}
+
+              <p className="controls-hint-text">{t.controlsTip}</p>
+              <small>{player ? `${t.cloudLink} ${player.displayName.toUpperCase()}` : t.guestSave}</small>
             </div>
 
             <aside className="service-panel" aria-label="Haftalik challenge">
-              <p className="module-id">WEEKLY PROTOCOL</p>
+              <p className="module-id">{t.weeklyProtocol}</p>
               {challenge ? <>
-                <div className="challenge-level"><span>SECTOR</span><strong>{String(challenge.level).padStart(2, "0")}</strong></div>
-                <h2>{modifierCopy[challenge.modifier] ?? challenge.modifier}</h2>
-                <p>Hafta yakunigacha eng yaxshi vaqtni qo‘ying va eksklyuziv badge oling.</p>
+                <div className="challenge-level"><span>{t.sector}</span><strong>{String(challenge.level).padStart(2, "0")}</strong></div>
+                <h2>{t.modifiers[challenge.modifier] ?? challenge.modifier}</h2>
+                <p>{t.weeklySub}</p>
                 <div className="leaderboard-mini">
                   {leaderboard.length ? leaderboard.slice(0, 3).map((row, index) => (
                     <div key={`${row.display_name}-${index}`}><span>{index + 1}</span><b>{row.display_name}</b><time>{formatRun(row.time_ms)}</time></div>
-                  )) : <div className="empty-rank">Birinchi rekord sizniki bo‘lishi mumkin.</div>}
+                  )) : <div className="empty-rank">{t.emptyRank}</div>}
                 </div>
                 {catalog.length ? <div className="store-mini">
-                  <p>CORE STORE // STARS</p>
+                  <p>{t.coreStore}</p>
                   {catalog.slice(0, 2).map((item) => <button key={item.id} onClick={() => void buyItem(item)}>
                     <i style={{ background: item.accent }} /><span><b>{item.name}</b><small>{item.type}</small></span><strong>★ {item.stars}</strong>
                   </button>)}
                 </div> : null}
-              </> : <p>Challenge kanali tayyorlanmoqda…</p>}
+              </> : <p>{t.challengeLink}</p>}
             </aside>
           </div>
 
@@ -423,34 +680,107 @@ export default function PlayPage() {
         </div> : null}
 
         {started ? (
-          <iframe
-            key={`${attempt}-${challengeActive ? challenge?.id : "campaign"}`}
-            ref={frame}
-            title="Play ONE CORE"
-            src={`/game/?attempt=${attempt}${challengeQuery}`}
-            allow="autoplay; fullscreen; gamepad"
-            allowFullScreen
-          />
+          <div className="game-viewport-wrap">
+            <iframe
+              key={`${attempt}-${challengeActive ? challenge?.id : "campaign"}-${locale}`}
+              ref={frame}
+              title="Play ONE CORE"
+              src={`/game/?attempt=${attempt}&lang=${locale}${challengeQuery}`}
+              allow="autoplay; fullscreen; gamepad; clipboard-write"
+              allowFullScreen
+            />
+
+            {/* Tik holat uchun: Bitta bosh barmoq bilan qulay boshqaruv paneli */}
+            <div className="one-thumb-deck" role="toolbar" aria-label="Bir barmoq bilan boshqaruv">
+              {/* Asosiy harakatlar: Sakrash va Yadro almashtirish */}
+              <div className="thumb-actions-row">
+                <button
+                  type="button"
+                  className="thumb-action-btn jump-btn"
+                  onPointerDown={(e) => { e.preventDefault(); sendGameAction("jump", true); }}
+                  onPointerUp={(e) => { e.preventDefault(); sendGameAction("jump", false); }}
+                  onPointerLeave={() => sendGameAction("jump", false)}
+                  onPointerCancel={() => sendGameAction("jump", false)}
+                >
+                  <span className="btn-icon">⚡</span>
+                  <span className="btn-label">{locale === "uz" ? "SAKRASH" : "JUMP"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="thumb-action-btn core-btn"
+                  onPointerDown={(e) => { e.preventDefault(); sendGameAction("interact", true); }}
+                  onPointerUp={(e) => { e.preventDefault(); sendGameAction("interact", false); }}
+                  onPointerLeave={() => sendGameAction("interact", false)}
+                  onPointerCancel={() => sendGameAction("interact", false)}
+                >
+                  <span className="btn-icon">🔄</span>
+                  <span className="btn-label">{locale === "uz" ? "YADRO / ALMASH" : "CORE / SWAP"}</span>
+                </button>
+              </div>
+
+              {/* Yo‘nalish paneli: Chapga, Tezkor Sakrash, O‘ngga */}
+              <div className="thumb-movement-row">
+                <button
+                  type="button"
+                  className="thumb-dir-btn left-btn"
+                  onPointerDown={(e) => { e.preventDefault(); sendGameAction("move_left", true); }}
+                  onPointerUp={(e) => { e.preventDefault(); sendGameAction("move_left", false); }}
+                  onPointerLeave={() => sendGameAction("move_left", false)}
+                  onPointerCancel={() => sendGameAction("move_left", false)}
+                >
+                  <span className="dir-icon">◀</span>
+                  <span className="dir-text">{locale === "uz" ? "CHAPGA" : "LEFT"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="thumb-dir-center-btn"
+                  onPointerDown={(e) => { e.preventDefault(); sendGameAction("jump", true); }}
+                  onPointerUp={(e) => { e.preventDefault(); sendGameAction("jump", false); }}
+                  onPointerLeave={() => sendGameAction("jump", false)}
+                  onPointerCancel={() => sendGameAction("jump", false)}
+                >
+                  <span className="center-icon">▲</span>
+                  <span className="center-label">{locale === "uz" ? "SAKRA" : "JUMP"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="thumb-dir-btn right-btn"
+                  onPointerDown={(e) => { e.preventDefault(); sendGameAction("move_right", true); }}
+                  onPointerUp={(e) => { e.preventDefault(); sendGameAction("move_right", false); }}
+                  onPointerLeave={() => sendGameAction("move_right", false)}
+                  onPointerCancel={() => sendGameAction("move_right", false)}
+                >
+                  <span className="dir-text">{locale === "uz" ? "O‘NGGA" : "RIGHT"}</span>
+                  <span className="dir-icon">▶</span>
+                </button>
+              </div>
+
+              <div className="thumb-deck-bar">
+                <span>📱 {locale === "uz" ? "Tik holatda bir barmoq bilan boshqaring • Yotqizsangiz to‘liq ekranga o‘tadi" : "One-thumb portrait play • Rotate for full widescreen"}</span>
+              </div>
+            </div>
+          </div>
         ) : null}
 
         {state === "loading" ? <div className="game-loader" role="status" aria-live="polite">
           <div className="loader-core" aria-hidden="true"><span /><i /></div>
-          <p className="eyebrow">{challengeActive ? "WEEKLY PROTOCOL LINK" : "CORE BOOT SEQUENCE"}</p>
+          <p className="eyebrow">{challengeActive ? t.challengeLink : t.bootSeq}</p>
           <h2>{progress}%</h2>
           <div className="loader-track" aria-label={`Yuklanmoqda: ${progress}%`}><span style={{ width: `${progress}%` }} /></div>
           <div className="loader-meta"><span>{loadingCopy}</span><time>{formatElapsed(elapsed)}</time></div>
-          {elapsed >= 45 ? <button className="loader-retry" onClick={retry}>QAYTA URINISH ↻</button> : null}
+          {elapsed >= 45 ? <button className="loader-retry" onClick={retry}>{t.retry} ↻</button> : null}
         </div> : null}
 
         {state === "error" ? <div className="game-loader game-error" role="alert">
           <div className="loader-core" aria-hidden="true"><span /><i /></div>
-          <p className="eyebrow">CORE LINK INTERRUPTED</p>
-          <h2>Ulanish uzildi</h2>
+          <p className="eyebrow">{t.connLost.toUpperCase()}</p>
+          <h2>{t.connLost}</h2>
           <p>{error}</p>
-          <button className="button primary" onClick={retry}>QAYTA URINISH <span>↻</span></button>
+          <button className="button primary" onClick={retry}>{t.retry} <span>↻</span></button>
         </div> : null}
-
-        <div className="rotate-note"><div><p className="eyebrow">DEVICE ORIENTATION</p><h2>Telefonni yotiq holatga aylantiring</h2><p>Rotate your device to landscape.</p></div></div>
       </div>
     </main>
   );

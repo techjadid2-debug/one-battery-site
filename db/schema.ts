@@ -101,3 +101,20 @@ export const analyticsEvents = sqliteTable("analytics_events", {
   index("analytics_events_name_idx").on(table.eventName, table.createdAt),
   index("analytics_events_user_idx").on(table.userId),
 ]);
+
+export const coopRooms = sqliteTable("coop_rooms", {
+  id: text("id").primaryKey(),
+  chatId: text("chat_id").notNull(),
+  hostUserId: text("host_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  guestUserId: text("guest_user_id").references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("waiting"),
+  level: integer("level").notNull().default(1),
+  bestTimeRemainingMs: integer("best_time_remaining_ms").notNull().default(0),
+  batteriesCollected: integer("batteries_collected").notNull().default(0),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("coop_rooms_chat_idx").on(table.chatId),
+  index("coop_rooms_host_idx").on(table.hostUserId),
+]);
+

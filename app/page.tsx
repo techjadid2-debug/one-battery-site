@@ -154,6 +154,7 @@ export default function Home() {
         <a className="brand" href="#top" aria-label="ONE CORE home"><span className="core-dot" /> ONE <b>CORE</b></a>
         <nav id="nav-primary" className={navOpen ? "nav-open" : ""} aria-label="Primary navigation" onClick={() => setNavOpen(false)}>
           <a href="#protocol">{t.nav[0]}</a><a href="#robots">{t.nav[1]}</a><a href="#campaign">{t.nav[2]}</a><a href="#media">{t.nav[3]}</a>
+          <a href="/profile" style={{ color: "var(--cyan)", fontWeight: 700 }}>👤 PROFIL</a>
         </nav>
         <a href="/play" className="console-play">▶ {t.play}</a>
         <button className="lang-button" onClick={toggleLocale} aria-label="Change language">{locale.toUpperCase()} <span>⇄</span> {locale === "uz" ? "EN" : "UZ"}</button>
